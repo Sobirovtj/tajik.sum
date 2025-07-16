@@ -99,6 +99,44 @@
       font-size: 14px;
       background: rgba(0,0,0,0.3);
     }
+
+    /* Канкулятори телефоншакл */
+    .calc-container {
+      max-width: 300px;
+      margin: 1rem auto;
+      background: rgba(255,255,255,0.1);
+      padding: 1rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 30px rgba(0,0,0,0.2);
+      backdrop-filter: blur(10px);
+    }
+    #calcDisplay {
+      background: rgba(0,0,0,0.3);
+      color: #fff;
+      padding: 20px;
+      font-size: 32px;
+      text-align: right;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+    }
+    .calc-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .calc-buttons button {
+      padding: 20px;
+      font-size: 20px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .calc-buttons button:hover {
+      background: rgba(255,255,255,0.4);
+    }
   </style>
 </head>
 <body>
@@ -149,16 +187,27 @@
 
   <section id="calc">
     <h2>Канкулятор</h2>
-    <input type="number" id="calcInput1" placeholder="Рақами аввал..." />
-    <input type="number" id="calcInput2" placeholder="Рақами дуюм..." />
-    <select id="operation">
-      <option value="+">+</option>
-      <option value="-">−</option>
-      <option value="*">×</option>
-      <option value="/">÷</option>
-    </select>
-    <button class="add-btn" onclick="calculate()">Ҳисоб кардан</button>
-    <div id="calcResult" style="text-align:center; font-size: 22px; margin-top: 1rem;"></div>
+    <div class="calc-container">
+      <div id="calcDisplay">0</div>
+      <div class="calc-buttons">
+        <button onclick="append('7')">7</button>
+        <button onclick="append('8')">8</button>
+        <button onclick="append('9')">9</button>
+        <button onclick="setOperation('/')">÷</button>
+        <button onclick="append('4')">4</button>
+        <button onclick="append('5')">5</button>
+        <button onclick="append('6')">6</button>
+        <button onclick="setOperation('*')">×</button>
+        <button onclick="append('1')">1</button>
+        <button onclick="append('2')">2</button>
+        <button onclick="append('3')">3</button>
+        <button onclick="setOperation('-')">−</button>
+        <button onclick="clearCalc()">C</button>
+        <button onclick="append('0')">0</button>
+        <button onclick="calculate()">=</button>
+        <button onclick="setOperation('+')">+</button>
+      </div>
+    </div>
   </section>
 </main>
 
@@ -268,20 +317,43 @@ function downloadReport() {
   a.download = 'Молияи Шахсӣ.txt'; a.click(); URL.revokeObjectURL(a.href);
 }
 
+let calcValue = '';
+let currentOp = null;
+let firstOperand = null;
+
+function append(val) {
+  calcValue += val;
+  document.getElementById('calcDisplay').textContent = calcValue;
+}
+
+function setOperation(op) {
+  if (calcValue === '') return;
+  firstOperand = parseFloat(calcValue);
+  currentOp = op;
+  calcValue = '';
+}
+
 function calculate() {
-  const a = parseFloat(document.getElementById('calcInput1').value);
-  const b = parseFloat(document.getElementById('calcInput2').value);
-  const op = document.getElementById('operation').value;
-  let result = 'Натиҷа номаълум аст';
-  if (!isNaN(a) && !isNaN(b)) {
-    switch (op) {
-      case '+': result = a + b; break;
-      case '-': result = a - b; break;
-      case '*': result = a * b; break;
-      case '/': result = b !== 0 ? (a / b).toFixed(2) : 'Қисмбандӣ ба сифр мумкин нест'; break;
-    }
+  if (calcValue === '' || currentOp === null) return;
+  const second = parseFloat(calcValue);
+  let result = 0;
+  switch (currentOp) {
+    case '+': result = firstOperand + second; break;
+    case '-': result = firstOperand - second; break;
+    case '*': result = firstOperand * second; break;
+    case '/': result = second !== 0 ? (firstOperand / second).toFixed(2) : 'Қисмбандӣ ба сифр мумкин нест'; break;
   }
-  document.getElementById('calcResult').textContent = `Натиҷа: ${result}`;
+  document.getElementById('calcDisplay').textContent = `Натиҷа: ${result}`;
+  calcValue = '';
+  currentOp = null;
+  firstOperand = null;
+}
+
+function clearCalc() {
+  calcValue = '';
+  currentOp = null;
+  firstOperand = null;
+  document.getElementById('calcDisplay').textContent = '0';
 }
 
 function showSection(e, id) {
