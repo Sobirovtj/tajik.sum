@@ -83,7 +83,7 @@
       font-size: 16px;
       cursor: pointer;
     }
-    #itog, #nalichiItog {
+    #itog, #nalichiItog, #incomeItog {
       font-size: 20px;
       font-weight: 700;
       text-align: center;
@@ -177,6 +177,7 @@
 <nav>
   <a href="#rasxod" class="active" onclick="showSection(event, 'rasxod')">Расход</a>
   <a href="#nalichi" onclick="showSection(event, 'nalichi')">Нақдӣ</a>
+  <a href="#income" onclick="showSection(event, 'income')">Даромад</a>
   <a href="#diagram" onclick="showSection(event, 'diagram')">Диограма</a>
   <a href="#calc" onclick="showSection(event, 'calc')">Канкулятор</a>
 </nav>
@@ -201,6 +202,15 @@
     <button class="download-btn" onclick="downloadReport()">Скачать Молияи Шахсӣ.txt</button>
   </section>
 
+  <section id="income">
+    <h2>Даромадҳо</h2>
+    <input type="number" id="incomeInput" placeholder="Суммаи даромад..." />
+    <input type="text" id="incomeDescInput" placeholder="Номи даромад..." />
+    <button class="add-btn" onclick="addIncome()">+ Илова кардан</button>
+    <div class="list" id="incomeList"></div>
+    <div id="incomeItog">Ҷамъбасти даромад: 0 сомонӣ</div>
+  </section>
+
   <section id="diagram">
     <h2>Диограмаҳо</h2>
     <div class="chart-container">
@@ -210,6 +220,10 @@
     <div class="chart-container">
       <h3>Диограмаи Нақдӣ</h3>
       <canvas id="cashChart"></canvas>
+    </div>
+    <div class="chart-container">
+      <h3>Диограмаи Даромад</h3>
+      <canvas id="incomeChart"></canvas>
     </div>
   </section>
 
@@ -252,9 +266,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  let expenses = [], nalichi = [];
+  let expenses = [], nalichi = [], incomes = [];
   const EXPENSES_KEY = 'moliyasi_expenses';
   const NALICHI_KEY = 'moliyasi_nalichi';
+  const INCOME_KEY = 'moliyasi_income';
 
   function formatDate() {
     const now = new Date();
@@ -264,11 +279,13 @@
   function saveData() {
     localStorage.setItem(EXPENSES_KEY, JSON.stringify(expenses));
     localStorage.setItem(NALICHI_KEY, JSON.stringify(nalichi));
+    localStorage.setItem(INCOME_KEY, JSON.stringify(incomes));
   }
 
   function loadData() {
     expenses = JSON.parse(localStorage.getItem(EXPENSES_KEY) || '[]');
     nalichi = JSON.parse(localStorage.getItem(NALICHI_KEY) || '[]');
+    incomes = JSON.parse(localStorage.getItem(INCOME_KEY) || '[]');
   }
 
   function addExpense() {
@@ -325,6 +342,33 @@
     document.getElementById('nalichiItog').textContent = `Баланс: ${total} сомонӣ`;
   }
 
+  function addIncome() {
+    const amount = parseFloat(document.getElementById('incomeInput').value);
+    const desc = document.getElementById('incomeDescInput').value.trim();
+    if (!amount || amount <= 0) return alert("Суммаи дуруст ворид кунед.");
+    incomes.push({ amount, desc, date: formatDate() });
+    updateIncome(); updateIncomeChart(); saveData();
+    document.getElementById('incomeInput').value = '';
+    document.getElementById('incomeDescInput').value = '';
+  }
+
+  function updateIncome() {
+    const incomeDiv = document.getElementById('incomeList');
+    incomeDiv.innerHTML = ''; let total = 0;
+    incomes.forEach((item, i) => {
+      total += item.amount;
+      const div = document.createElement('div');
+      div.className = 'item';
+      div.textContent = `${i + 1}) ${item.amount}с (${item.desc || 'беном'}) - ${item.date}`;
+      const btn = document.createElement('button');
+      btn.textContent = '❌';
+      btn.onclick = () => { incomes.splice(i, 1); updateIncome(); updateIncomeChart(); saveData(); };
+      div.appendChild(btn);
+      incomeDiv.appendChild(div);
+    });
+    document.getElementById('incomeItog').textContent = `Ҷамъбасти даромад: ${total} сомонӣ`;
+  }
+
   function updateExpenseChart() {
     const total = expenses.reduce((sum, x) => sum + x.amount, 0);
     const data = { labels: ['Расход'], datasets: [{ data: [total], backgroundColor: ['#E91E63'] }] };
@@ -341,12 +385,22 @@
     else window.cashChart = new Chart(ctx, { type: 'doughnut', data });
   }
 
+  function updateIncomeChart() {
+    const total = incomes.reduce((sum, x) => sum + x.amount, 0);
+    const data = { labels: ['Даромад'], datasets: [{ data: [total], backgroundColor: ['#2196f3'] }] };
+    const ctx = document.getElementById('incomeChart').getContext('2d');
+    if (window.incomeChart) { window.incomeChart.data = data; window.incomeChart.update(); }
+    else window.incomeChart = new Chart(ctx, { type: 'doughnut', data });
+  }
+
   function downloadReport() {
     let txt = 'Молияи Шахсӣ\n\nРасходҳо:\n';
     expenses.forEach((x,i)=>txt+=`${i+1}) ${x.amount}с (${x.desc || 'беном'}) - ${x.date}\n`);
     txt += `Итог расходов: ${expenses.reduce((s,x)=>s+x.amount,0)} сомонӣ\n\nНақдӣ:\n`;
     nalichi.forEach((x,i)=>txt+=`${i+1}) ${x.amount}с (${x.desc || 'беном'}) - ${x.date}\n`);
-    txt += `Баланс: ${nalichi.reduce((s,x)=>s+x.amount,0)} сомонӣ\n`;
+    txt += `Баланс: ${nalichi.reduce((s,x)=>s+x.amount,0)} сомонӣ\n\nДаромадҳо:\n`;
+    incomes.forEach((x,i)=>txt+=`${i+1}) ${x.amount}с (${x.desc || 'беном'}) - ${x.date}\n`);
+    txt += `Ҷамъбасти даромад: ${incomes.reduce((s,x)=>s+x.amount,0)} сомонӣ\n`;
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([txt], { type: 'text/plain' }));
     a.download = 'Молияи Шахсӣ.txt'; a.click(); URL.revokeObjectURL(a.href);
@@ -366,7 +420,6 @@
   function calculateResult() {
     try {
       const expression = display.value.replace(/÷/g, '/').replace(/×/g, '*');
-      // Эҳтиёт бо eval, барои мисол оддӣ аст
       let result = eval(expression);
       if (result === undefined) result = '';
       display.value = result;
@@ -384,7 +437,13 @@
   }
 
   window.onload = () => {
-    loadData(); updateExpenses(); updateNalichi(); updateExpenseChart(); updateCashChart();
+    loadData(); 
+    updateExpenses(); 
+    updateNalichi(); 
+    updateIncome();
+    updateExpenseChart(); 
+    updateCashChart();
+    updateIncomeChart();
   };
 </script>
 
