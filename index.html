@@ -99,44 +99,6 @@
       font-size: 14px;
       background: rgba(0,0,0,0.3);
     }
-
-    /* Канкулятори телефоншакл */
-    .calc-container {
-      max-width: 300px;
-      margin: 1rem auto;
-      background: rgba(255,255,255,0.1);
-      padding: 1rem;
-      border-radius: 16px;
-      box-shadow: 0 4px 30px rgba(0,0,0,0.2);
-      backdrop-filter: blur(10px);
-    }
-    #calcDisplay {
-      background: rgba(0,0,0,0.3);
-      color: #fff;
-      padding: 20px;
-      font-size: 32px;
-      text-align: right;
-      border-radius: 10px;
-      margin-bottom: 1rem;
-    }
-    .calc-buttons {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-    }
-    .calc-buttons button {
-      padding: 20px;
-      font-size: 20px;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.2);
-      border: none;
-      color: white;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .calc-buttons button:hover {
-      background: rgba(255,255,255,0.4);
-    }
   </style>
 </head>
 <body>
@@ -187,27 +149,16 @@
 
   <section id="calc">
     <h2>Канкулятор</h2>
-    <div class="calc-container">
-      <div id="calcDisplay">0</div>
-      <div class="calc-buttons">
-        <button onclick="append('7')">7</button>
-        <button onclick="append('8')">8</button>
-        <button onclick="append('9')">9</button>
-        <button onclick="setOperation('/')">÷</button>
-        <button onclick="append('4')">4</button>
-        <button onclick="append('5')">5</button>
-        <button onclick="append('6')">6</button>
-        <button onclick="setOperation('*')">×</button>
-        <button onclick="append('1')">1</button>
-        <button onclick="append('2')">2</button>
-        <button onclick="append('3')">3</button>
-        <button onclick="setOperation('-')">−</button>
-        <button onclick="clearCalc()">C</button>
-        <button onclick="append('0')">0</button>
-        <button onclick="calculate()">=</button>
-        <button onclick="setOperation('+')">+</button>
-      </div>
-    </div>
+    <input type="number" id="calcInput1" placeholder="Рақами аввал..." />
+    <input type="number" id="calcInput2" placeholder="Рақами дуюм..." />
+    <select id="operation">
+      <option value="+">+</option>
+      <option value="-">−</option>
+      <option value="*">×</option>
+      <option value="/">÷</option>
+    </select>
+    <button class="add-btn" onclick="calculate()">Ҳисоб кардан</button>
+    <div id="calcResult" style="text-align:center; font-size: 22px; margin-top: 1rem;"></div>
   </section>
 </main>
 
@@ -223,7 +174,7 @@ const NALICHI_KEY = 'moliyasi_nalichi';
 
 function formatDate() {
   const now = new Date();
-  return ${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth()+1).padStart(2, '0')}.${now.getFullYear()};
+  return `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth()+1).padStart(2, '0')}.${now.getFullYear()}`;
 }
 
 function saveData() {
@@ -253,14 +204,14 @@ function updateExpenses() {
     total += item.amount;
     const div = document.createElement('div');
     div.className = 'item';
-    div.textContent = ${i + 1}) ${item.amount}с (${item.desc || 'беном'}) - ${item.date};
+    div.textContent = `${i + 1}) ${item.amount}с (${item.desc || 'беном'}) - ${item.date}`;
     const btn = document.createElement('button');
     btn.textContent = '❌';
     btn.onclick = () => { expenses.splice(i, 1); updateExpenses(); updateExpenseChart(); saveData(); };
     div.appendChild(btn);
     expensesDiv.appendChild(div);
   });
-  document.getElementById('itog').textContent = Итог: ${total} сомонӣ;
+  document.getElementById('itog').textContent = `Итог: ${total} сомонӣ`;
 }
 
 function addNalichi() {
@@ -280,14 +231,14 @@ function updateNalichi() {
     total += item.amount;
     const div = document.createElement('div');
     div.className = 'item';
-    div.textContent = ${i + 1}) ${item.amount}с (${item.desc || 'беном'}) - ${item.date};
+    div.textContent = `${i + 1}) ${item.amount}с (${item.desc || 'беном'}) - ${item.date}`;
     const btn = document.createElement('button');
     btn.textContent = '❌';
     btn.onclick = () => { nalichi.splice(i, 1); updateNalichi(); updateCashChart(); saveData(); };
     div.appendChild(btn);
     nalichiDiv.appendChild(div);
   });
-  document.getElementById('nalichiItog').textContent = Баланс: ${total} сомонӣ;
+  document.getElementById('nalichiItog').textContent = `Баланс: ${total} сомонӣ`;
 }
 
 function updateExpenseChart() {
@@ -308,52 +259,29 @@ function updateCashChart() {
 
 function downloadReport() {
   let txt = 'Молияи Шахсӣ\n\nРасходҳо:\n';
-  expenses.forEach((x,i)=>txt+=${i+1}) ${x.amount}с (${x.desc || 'беном'}) - ${x.date}\n);
-  txt += Итог расходов: ${expenses.reduce((s,x)=>s+x.amount,0)} сомонӣ\n\nНақдӣ:\n;
-  nalichi.forEach((x,i)=>txt+=${i+1}) ${x.amount}с (${x.desc || 'беном'}) - ${x.date}\n);
-  txt += Баланс: ${nalichi.reduce((s,x)=>s+x.amount,0)} сомонӣ\n;
+  expenses.forEach((x,i)=>txt+=`${i+1}) ${x.amount}с (${x.desc || 'беном'}) - ${x.date}\n`);
+  txt += `Итог расходов: ${expenses.reduce((s,x)=>s+x.amount,0)} сомонӣ\n\nНақдӣ:\n`;
+  nalichi.forEach((x,i)=>txt+=`${i+1}) ${x.amount}с (${x.desc || 'беном'}) - ${x.date}\n`);
+  txt += `Баланс: ${nalichi.reduce((s,x)=>s+x.amount,0)} сомонӣ\n`;
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([txt], { type: 'text/plain' }));
   a.download = 'Молияи Шахсӣ.txt'; a.click(); URL.revokeObjectURL(a.href);
 }
 
-let calcValue = '';
-let currentOp = null;
-let firstOperand = null;
-
-function append(val) {
-  calcValue += val;
-  document.getElementById('calcDisplay').textContent = calcValue;
-}
-
-function setOperation(op) {
-  if (calcValue === '') return;
-  firstOperand = parseFloat(calcValue);
-  currentOp = op;
-  calcValue = '';
-}
-
 function calculate() {
-  if (calcValue === '' || currentOp === null) return;
-  const second = parseFloat(calcValue);
-  let result = 0;
-  switch (currentOp) {
-    case '+': result = firstOperand + second; break;
-    case '-': result = firstOperand - second; break;
-    case '*': result = firstOperand * second; break;
-    case '/': result = second !== 0 ? (firstOperand / second).toFixed(2) : 'Қисмбандӣ ба сифр мумкин нест'; break;
+  const a = parseFloat(document.getElementById('calcInput1').value);
+  const b = parseFloat(document.getElementById('calcInput2').value);
+  const op = document.getElementById('operation').value;
+  let result = 'Натиҷа номаълум аст';
+  if (!isNaN(a) && !isNaN(b)) {
+    switch (op) {
+      case '+': result = a + b; break;
+      case '-': result = a - b; break;
+      case '*': result = a * b; break;
+      case '/': result = b !== 0 ? (a / b).toFixed(2) : 'Қисмбандӣ ба сифр мумкин нест'; break;
+    }
   }
-  document.getElementById('calcDisplay').textContent = Натиҷа: ${result};
-  calcValue = '';
-  currentOp = null;
-  firstOperand = null;
-}
-
-function clearCalc() {
-  calcValue = '';
-  currentOp = null;
-  firstOperand = null;
-  document.getElementById('calcDisplay').textContent = '0';
+  document.getElementById('calcResult').textContent = `Натиҷа: ${result}`;
 }
 
 function showSection(e, id) {
