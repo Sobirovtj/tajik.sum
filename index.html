@@ -83,7 +83,7 @@
       font-size: 16px;
       cursor: pointer;
     }
-    #itog, #nalichiItog, #incomeItog {
+    #itog, #nalichiItog {
       font-size: 20px;
       font-weight: 700;
       text-align: center;
@@ -99,72 +99,6 @@
       font-size: 14px;
       background: rgba(0,0,0,0.3);
     }
-
-    /* Нов дизайн барои канкулятор */
-    #calc {
-      max-width: 320px;
-      margin: 1.5rem auto;
-    }
-    .calculator {
-      background: rgba(0,0,0,0.3);
-      padding: 1rem;
-      border-radius: 12px;
-      box-shadow: 0 0 10px #00000055;
-    }
-    #calcDisplay {
-      width: 100%;
-      height: 40px;
-      font-size: 24px;
-      text-align: right;
-      padding: 0 10px;
-      margin-bottom: 10px;
-      border-radius: 6px;
-      border: none;
-      background: #222;
-      color: #fff;
-      user-select: none;
-    }
-    .buttons {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-    }
-    button.calc-btn {
-      font-size: 20px;
-      padding: 15px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      background: #444;
-      color: white;
-      box-shadow: 0 3px #222;
-      transition: background 0.2s;
-      user-select: none;
-    }
-    button.calc-btn:hover {
-      background: #666;
-    }
-    button.calc-btn:active {
-      box-shadow: none;
-      transform: translateY(2px);
-    }
-    .btn-clear {
-      background: #e74c3c;
-    }
-    .btn-clear:hover {
-      background: #c0392b;
-    }
-    .btn-equal {
-      background: #27ae60;
-      grid-column: 4 / 5;
-      grid-row: 5;
-    }
-    .btn-equal:hover {
-      background: #1e8449;
-    }
-    .btn-zero {
-      grid-column: 1 / 3;
-    }
   </style>
 </head>
 <body>
@@ -177,7 +111,6 @@
 <nav>
   <a href="#rasxod" class="active" onclick="showSection(event, 'rasxod')">Расход</a>
   <a href="#nalichi" onclick="showSection(event, 'nalichi')">Нақдӣ</a>
-  <a href="#income" onclick="showSection(event, 'income')">Даромад</a>
   <a href="#diagram" onclick="showSection(event, 'diagram')">Диограма</a>
   <a href="#calc" onclick="showSection(event, 'calc')">Канкулятор</a>
 </nav>
@@ -202,15 +135,6 @@
     <button class="download-btn" onclick="downloadReport()">Скачать Молияи Шахсӣ.txt</button>
   </section>
 
-  <section id="income">
-    <h2>Даромадҳо</h2>
-    <input type="number" id="incomeInput" placeholder="Суммаи даромад..." />
-    <input type="text" id="incomeDescInput" placeholder="Номи даромад..." />
-    <button class="add-btn" onclick="addIncome()">+ Илова кардан</button>
-    <div class="list" id="incomeList"></div>
-    <div id="incomeItog">Ҷамъбасти даромад: 0 сомонӣ</div>
-  </section>
-
   <section id="diagram">
     <h2>Диограмаҳо</h2>
     <div class="chart-container">
@@ -221,42 +145,20 @@
       <h3>Диограмаи Нақдӣ</h3>
       <canvas id="cashChart"></canvas>
     </div>
-    <div class="chart-container">
-      <h3>Диограмаи Даромад</h3>
-      <canvas id="incomeChart"></canvas>
-    </div>
   </section>
 
   <section id="calc">
     <h2>Канкулятор</h2>
-    <div class="calculator">
-      <input type="text" id="calcDisplay" readonly />
-      <div class="buttons">
-        <button class="calc-btn btn-clear" onclick="press('C')">C</button>
-        <button class="calc-btn" onclick="press('(')">(</button>
-        <button class="calc-btn" onclick="press(')')">)</button>
-        <button class="calc-btn" onclick="press('/')">÷</button>
-
-        <button class="calc-btn" onclick="press('7')">7</button>
-        <button class="calc-btn" onclick="press('8')">8</button>
-        <button class="calc-btn" onclick="press('9')">9</button>
-        <button class="calc-btn" onclick="press('*')">×</button>
-
-        <button class="calc-btn" onclick="press('4')">4</button>
-        <button class="calc-btn" onclick="press('5')">5</button>
-        <button class="calc-btn" onclick="press('6')">6</button>
-        <button class="calc-btn" onclick="press('-')">−</button>
-
-        <button class="calc-btn" onclick="press('1')">1</button>
-        <button class="calc-btn" onclick="press('2')">2</button>
-        <button class="calc-btn" onclick="press('3')">3</button>
-        <button class="calc-btn" onclick="press('+')">+</button>
-
-        <button class="calc-btn btn-zero" onclick="press('0')">0</button>
-        <button class="calc-btn" onclick="press('.')">.</button>
-        <button class="calc-btn btn-equal" onclick="calculateResult()">=</button>
-      </div>
-    </div>
+    <input type="number" id="calcInput1" placeholder="Рақами аввал..." />
+    <input type="number" id="calcInput2" placeholder="Рақами дуюм..." />
+    <select id="operation">
+      <option value="+">+</option>
+      <option value="-">−</option>
+      <option value="*">×</option>
+      <option value="/">÷</option>
+    </select>
+    <button class="add-btn" onclick="calculate()">Ҳисоб кардан</button>
+    <div id="calcResult" style="text-align:center; font-size: 22px; margin-top: 1rem;"></div>
   </section>
 </main>
 
@@ -266,185 +168,163 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  let expenses = [], nalichi = [], incomes = [];
-  const EXPENSES_KEY = 'moliyasi_expenses';
-  const NALICHI_KEY = 'moliyasi_nalichi';
-  const INCOME_KEY = 'moliyasi_income';
+let expenses = [], nalichi = [];
+const EXPENSES_KEY = 'moliyasi_expenses';
+const NALICHI_KEY = 'moliyasi_nalichi';
 
-  function formatDate() {
-    const now = new Date();
-    return `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth()+1).padStart(2, '0')}.${now.getFullYear()}`;
-  }
+function formatDate() {
+  const now = new Date();
+  return `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth()+1).padStart(2, '0')}.${now.getFullYear()}`;
+}
 
-  function saveData() {
-    localStorage.setItem(EXPENSES_KEY, JSON.stringify(expenses));
-    localStorage.setItem(NALICHI_KEY, JSON.stringify(nalichi));
-    localStorage.setItem(INCOME_KEY, JSON.stringify(incomes));
-  }
+function saveData() {
+  localStorage.setItem(EXPENSES_KEY, JSON.stringify(expenses));
+  localStorage.setItem(NALICHI_KEY, JSON.stringify(nalichi));
+}
 
-  function loadData() {
-    expenses = JSON.parse(localStorage.getItem(EXPENSES_KEY) || '[]');
-    nalichi = JSON.parse(localStorage.getItem(NALICHI_KEY) || '[]');
-    incomes = JSON.parse(localStorage.getItem(INCOME_KEY) || '[]');
-  }
+function loadData() {
+  expenses = JSON.parse(localStorage.getItem(EXPENSES_KEY) || '[]');
+  nalichi = JSON.parse(localStorage.getItem(NALICHI_KEY) || '[]');
 
-  function addExpense() {
-    const amount = parseFloat(document.getElementById('amountInput').value);
-    const desc = document.getElementById('descInput').value.trim();
-    if (!amount || amount <= 0) return alert("Суммаи дуруст ворид кунед.");
-    expenses.push({ amount, desc, date: formatDate() });
-    updateExpenses(); updateExpenseChart(); saveData();
-    document.getElementById('amountInput').value = '';
-    document.getElementById('descInput').value = '';
-  }
+  // Агар аллакай хароҷот ё нақдӣ дошта бошем, майдонҳоро маҳдуд мекунем
+  if(expenses.length > 0) disableExpenseInput();
+  if(nalichi.length > 0) disableNalichiInput();
+}
 
-  function updateExpenses() {
-    const expensesDiv = document.getElementById('expenses');
-    expensesDiv.innerHTML = ''; let total = 0;
-    expenses.forEach((item, i) => {
-      total += item.amount;
-      const div = document.createElement('div');
-      div.className = 'item';
-      div.textContent = `${i + 1}) ${item.amount}с (${item.desc || 'беном'}) - ${item.date}`;
-      const btn = document.createElement('button');
-      btn.textContent = '❌';
-      btn.onclick = () => { expenses.splice(i, 1); updateExpenses(); updateExpenseChart(); saveData(); };
-      div.appendChild(btn);
-      expensesDiv.appendChild(div);
-    });
-    document.getElementById('itog').textContent = `Итог: ${total} сомонӣ`;
-  }
+function addExpense() {
+  const amountInput = document.getElementById('amountInput');
+  const descInput = document.getElementById('descInput');
+  const amount = parseFloat(amountInput.value);
+  const desc = descInput.value.trim();
+  if (!amount || amount <= 0) return alert("Суммаи дуруст ворид кунед.");
 
-  function addNalichi() {
-    const amount = parseFloat(document.getElementById('nalichiInput').value);
-    const desc = document.getElementById('nalichiDescInput').value.trim();
-    if (!amount || amount <= 0) return alert("Маблағи дуруст ворид кунед.");
-    nalichi.push({ amount, desc, date: formatDate() });
-    updateNalichi(); updateCashChart(); saveData();
-    document.getElementById('nalichiInput').value = '';
-    document.getElementById('nalichiDescInput').value = '';
-  }
+  expenses.push({ amount, desc, date: formatDate() });
+  updateExpenses(); updateExpenseChart(); saveData();
 
-  function updateNalichi() {
-    const nalichiDiv = document.getElementById('nalichiList');
-    nalichiDiv.innerHTML = ''; let total = 0;
-    nalichi.forEach((item, i) => {
-      total += item.amount;
-      const div = document.createElement('div');
-      div.className = 'item';
-      div.textContent = `${i + 1}) ${item.amount}с (${item.desc || 'беном'}) - ${item.date}`;
-      const btn = document.createElement('button');
-      btn.textContent = '❌';
-      btn.onclick = () => { nalichi.splice(i, 1); updateNalichi(); updateCashChart(); saveData(); };
-      div.appendChild(btn);
-      nalichiDiv.appendChild(div);
-    });
-    document.getElementById('nalichiItog').textContent = `Баланс: ${total} сомонӣ`;
-  }
+  disableExpenseInput();
 
-  function addIncome() {
-    const amount = parseFloat(document.getElementById('incomeInput').value);
-    const desc = document.getElementById('incomeDescInput').value.trim();
-    if (!amount || amount <= 0) return alert("Суммаи дуруст ворид кунед.");
-    incomes.push({ amount, desc, date: formatDate() });
-    updateIncome(); updateIncomeChart(); saveData();
-    document.getElementById('incomeInput').value = '';
-    document.getElementById('incomeDescInput').value = '';
-  }
+  alert("Маълумот сабт шуд ва дигар тағйирнопазир аст.");
+}
 
-  function updateIncome() {
-    const incomeDiv = document.getElementById('incomeList');
-    incomeDiv.innerHTML = ''; let total = 0;
-    incomes.forEach((item, i) => {
-      total += item.amount;
-      const div = document.createElement('div');
-      div.className = 'item';
-      div.textContent = `${i + 1}) ${item.amount}с (${item.desc || 'беном'}) - ${item.date}`;
-      const btn = document.createElement('button');
-      btn.textContent = '❌';
-      btn.onclick = () => { incomes.splice(i, 1); updateIncome(); updateIncomeChart(); saveData(); };
-      div.appendChild(btn);
-      incomeDiv.appendChild(div);
-    });
-    document.getElementById('incomeItog').textContent = `Ҷамъбасти даромад: ${total} сомонӣ`;
-  }
+function disableExpenseInput() {
+  document.getElementById('amountInput').disabled = true;
+  document.getElementById('descInput').disabled = true;
+  document.querySelector('#rasxod .add-btn').disabled = true;
+}
 
-  function updateExpenseChart() {
-    const total = expenses.reduce((sum, x) => sum + x.amount, 0);
-    const data = { labels: ['Расход'], datasets: [{ data: [total], backgroundColor: ['#E91E63'] }] };
-    const ctx = document.getElementById('expenseChart').getContext('2d');
-    if (window.expenseChart) { window.expenseChart.data = data; window.expenseChart.update(); }
-    else window.expenseChart = new Chart(ctx, { type: 'doughnut', data });
-  }
+function updateExpenses() {
+  const expensesDiv = document.getElementById('expenses');
+  expensesDiv.innerHTML = ''; let total = 0;
+  expenses.forEach((item, i) => {
+    total += item.amount;
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.textContent = `${i + 1}) ${item.amount}с (${item.desc || 'беном'}) - ${item.date}`;
+    const btn = document.createElement('button');
+    btn.textContent = '❌';
+    btn.onclick = () => {
+      alert("Ҳазф кардани маълумот манъ аст, зеро маълумот сахт шудааст.");
+    };
+    div.appendChild(btn);
+    expensesDiv.appendChild(div);
+  });
+  document.getElementById('itog').textContent = `Итог: ${total} сомонӣ`;
+}
 
-  function updateCashChart() {
-    const total = nalichi.reduce((sum, x) => sum + x.amount, 0);
-    const data = { labels: ['Нақдӣ'], datasets: [{ data: [total], backgroundColor: ['#4CAF50'] }] };
-    const ctx = document.getElementById('cashChart').getContext('2d');
-    if (window.cashChart) { window.cashChart.data = data; window.cashChart.update(); }
-    else window.cashChart = new Chart(ctx, { type: 'doughnut', data });
-  }
+function addNalichi() {
+  const amountInput = document.getElementById('nalichiInput');
+  const descInput = document.getElementById('nalichiDescInput');
+  const amount = parseFloat(amountInput.value);
+  const desc = descInput.value.trim();
+  if (!amount || amount <= 0) return alert("Маблағи дуруст ворид кунед.");
 
-  function updateIncomeChart() {
-    const total = incomes.reduce((sum, x) => sum + x.amount, 0);
-    const data = { labels: ['Даромад'], datasets: [{ data: [total], backgroundColor: ['#2196f3'] }] };
-    const ctx = document.getElementById('incomeChart').getContext('2d');
-    if (window.incomeChart) { window.incomeChart.data = data; window.incomeChart.update(); }
-    else window.incomeChart = new Chart(ctx, { type: 'doughnut', data });
-  }
+  nalichi.push({ amount, desc, date: formatDate() });
+  updateNalichi(); updateCashChart(); saveData();
 
-  function downloadReport() {
-    let txt = 'Молияи Шахсӣ\n\nРасходҳо:\n';
-    expenses.forEach((x,i)=>txt+=`${i+1}) ${x.amount}с (${x.desc || 'беном'}) - ${x.date}\n`);
-    txt += `Итог расходов: ${expenses.reduce((s,x)=>s+x.amount,0)} сомонӣ\n\nНақдӣ:\n`;
-    nalichi.forEach((x,i)=>txt+=`${i+1}) ${x.amount}с (${x.desc || 'беном'}) - ${x.date}\n`);
-    txt += `Баланс: ${nalichi.reduce((s,x)=>s+x.amount,0)} сомонӣ\n\nДаромадҳо:\n`;
-    incomes.forEach((x,i)=>txt+=`${i+1}) ${x.amount}с (${x.desc || 'беном'}) - ${x.date}\n`);
-    txt += `Ҷамъбасти даромад: ${incomes.reduce((s,x)=>s+x.amount,0)} сомонӣ\n`;
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([txt], { type: 'text/plain' }));
-    a.download = 'Молияи Шахсӣ.txt'; a.click(); URL.revokeObjectURL(a.href);
-  }
+  disableNalichiInput();
 
-  // Канкулятор
-  const display = document.getElementById('calcDisplay');
+  alert("Маълумот сабт шуд ва дигар тағйирнопазир аст.");
+}
 
-  function press(value) {
-    if (value === 'C') {
-      display.value = '';
-    } else {
-      display.value += value;
+function disableNalichiInput() {
+  document.getElementById('nalichiInput').disabled = true;
+  document.getElementById('nalichiDescInput').disabled = true;
+  document.querySelector('#nalichi .add-btn').disabled = true;
+}
+
+function updateNalichi() {
+  const nalichiDiv = document.getElementById('nalichiList');
+  nalichiDiv.innerHTML = ''; let total = 0;
+  nalichi.forEach((item, i) => {
+    total += item.amount;
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.textContent = `${i + 1}) ${item.amount}с (${item.desc || 'беном'}) - ${item.date}`;
+    const btn = document.createElement('button');
+    btn.textContent = '❌';
+    btn.onclick = () => {
+      alert("Ҳазф кардани маълумот манъ аст, зеро маълумот сахт шудааст.");
+    };
+    div.appendChild(btn);
+    nalichiDiv.appendChild(div);
+  });
+  document.getElementById('nalichiItog').textContent = `Баланс: ${total} сомонӣ`;
+}
+
+function updateExpenseChart() {
+  const total = expenses.reduce((sum, x) => sum + x.amount, 0);
+  const data = { labels: ['Расход'], datasets: [{ data: [total], backgroundColor: ['#E91E63'] }] };
+  const ctx = document.getElementById('expenseChart').getContext('2d');
+  if (window.expenseChart) { window.expenseChart.data = data; window.expenseChart.update(); }
+  else window.expenseChart = new Chart(ctx, { type: 'doughnut', data });
+}
+
+function updateCashChart() {
+  const total = nalichi.reduce((sum, x) => sum + x.amount, 0);
+  const data = { labels: ['Нақдӣ'], datasets: [{ data: [total], backgroundColor: ['#4CAF50'] }] };
+  const ctx = document.getElementById('cashChart').getContext('2d');
+  if (window.cashChart) { window.cashChart.data = data; window.cashChart.update(); }
+  else window.cashChart = new Chart(ctx, { type: 'doughnut', data });
+}
+
+function downloadReport() {
+  let txt = 'Молияи Шахсӣ\n\nРасходҳо:\n';
+  expenses.forEach((x,i)=>txt+=`${i+1}) ${x.amount}с (${x.desc || 'беном'}) - ${x.date}\n`);
+  txt += `Итог расходов: ${expenses.reduce((s,x)=>s+x.amount,0)} сомонӣ\n\nНақдӣ:\n`;
+  nalichi.forEach((x,i)=>txt+=`${i+1}) ${x.amount}с (${x.desc || 'беном'}) - ${x.date}\n`);
+  txt += `Баланс: ${nalichi.reduce((s,x)=>s+x.amount,0)} сомонӣ\n`;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([txt], { type: 'text/plain' }));
+  a.download = 'Молияи Шахсӣ.txt'; a.click(); URL.revokeObjectURL(a.href);
+}
+
+function calculate() {
+  const a = parseFloat(document.getElementById('calcInput1').value);
+  const b = parseFloat(document.getElementById('calcInput2').value);
+  const op = document.getElementById('operation').value;
+  let result = 'Натиҷа номаълум аст';
+  if (!isNaN(a) && !isNaN(b)) {
+    switch (op) {
+      case '+': result = a + b; break;
+      case '-': result = a - b; break;
+      case '*': result = a * b; break;
+      case '/': result = b !== 0 ? (a / b).toFixed(2) : 'Қисмбандӣ ба сифр мумкин нест'; break;
     }
   }
+  document.getElementById('calcResult').textContent = `Натиҷа: ${result}`;
+}
 
-  function calculateResult() {
-    try {
-      const expression = display.value.replace(/÷/g, '/').replace(/×/g, '*');
-      let result = eval(expression);
-      if (result === undefined) result = '';
-      display.value = result;
-    } catch {
-      display.value = 'Хато!';
-    }
-  }
+function showSection(e, id) {
+  e.preventDefault();
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+  e.currentTarget.classList.add('active');
+  document.querySelectorAll('main section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
 
-  function showSection(e, id) {
-    e.preventDefault();
-    document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
-    e.currentTarget.classList.add('active');
-    document.querySelectorAll('main section').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-  }
-
-  window.onload = () => {
-    loadData(); 
-    updateExpenses(); 
-    updateNalichi(); 
-    updateIncome();
-    updateExpenseChart(); 
-    updateCashChart();
-    updateIncomeChart();
-  };
+window.onload = () => {
+  loadData(); updateExpenses(); updateNalichi(); updateExpenseChart(); updateCashChart();
+};
 </script>
 
 </body>
