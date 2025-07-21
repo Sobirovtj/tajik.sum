@@ -8,269 +8,145 @@
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #4568dc 0%, #b06ab3 100%);
-      min-height: 100vh;
-      color: white;
-      display: flex;
-      flex-direction: column;
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      padding: 20px;
     }
-    header {
-      background: rgba(0,0,0,0.3);
-      padding: 1rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    header h1 { margin: 0; font-size: 24px; }
-    header button {
-      background: #ff5722;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      color: white;
-    }
-    nav {
-      display: flex;
-      background: rgba(0,0,0,0.3);
-      justify-content: space-around;
-      flex-wrap: wrap;
-    }
-    nav a {
-      padding: 1rem 0;
-      flex: 1;
-      color: white;
-      text-decoration: none;
+    h1, h2 {
       text-align: center;
     }
-    nav a.active { border-bottom: 3px solid #ffeb3b; }
-    main {
-      flex-grow: 1;
-      padding: 1rem 2rem;
-      max-width: 600px;
-      margin: auto;
-    }
-    section { display: none; }
-    section.active { display: block; }
-    input[type="number"], .add-btn, .download-btn {
-      width: 100%;
+    input, button {
       font-size: 18px;
-      padding: 14px;
-      border-radius: 10px;
-      margin-bottom: 1rem;
-      border: none;
-    }
-    .add-btn { background: #4caf50; color: white; }
-    .download-btn { background: #2196f3; color: white; }
-    .list {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      padding: 1rem;
-      max-height: 250px;
-      overflow-y: auto;
-    }
-    .item {
-      padding: 8px;
-      border-bottom: 1px solid rgba(255,255,255,0.2);
-    }
-    #itog, #nalichiItog {
-      font-size: 20px;
-      font-weight: 700;
-      text-align: center;
-      color: #ffeb3b;
-    }
-    .chart-container {
-      max-width: 400px;
-      margin: 1rem auto;
-    }
-    footer {
-      text-align: center;
-      padding: 1rem;
-      font-size: 14px;
-      background: rgba(0,0,0,0.3);
-    }
-    .calc-btns button {
-      padding: 10px 20px;
-      font-size: 20px;
+      padding: 10px;
       margin: 5px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      background: #ff9800;
+      border-radius: 8px;
+      border: 1px solid #aaa;
+    }
+    .section {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .history {
+      margin-top: 10px;
+      font-size: 16px;
+    }
+    .total {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    .btn-delete {
+      background: #e74c3c;
       color: white;
-      flex: 1 0 40%;
+    }
+    .btn-add {
+      background: #2ecc71;
+      color: white;
+    }
+    .btn-calc {
+      background: #3498db;
+      color: white;
     }
   </style>
 </head>
 <body>
 
-<header>
   <h1>Молияи Шахсӣ</h1>
-  <button onclick="location.reload()">Навсозӣ</button>
-</header>
 
-<nav>
-  <a href="#rasxod" class="active" onclick="showSection(event, 'rasxod')">Расход</a>
-  <a href="#nalichi" onclick="showSection(event, 'nalichi')">Нақдӣ</a>
-  <a href="#diagram" onclick="showSection(event, 'diagram')">Диограмма</a>
-  <a href="#calculator" onclick="showSection(event, 'calculator')">Калкулятор</a>
-</nav>
+  <div class="section">
+    <h2>📥 Иловаи даромад/хароҷот</h2>
+    <input type="text" id="description" placeholder="Шарҳ" />
+    <input type="number" id="amount" placeholder="Маблағ" />
+    <select id="type">
+      <option value="income">Даромад</option>
+      <option value="expense">Хароҷот</option>
+    </select>
+    <button class="btn-add" onclick="addTransaction()">Илова</button>
+    <button class="btn-delete" onclick="clearData()">Удалить ҳама</button>
 
-<main>
-  <section id="rasxod" class="active">
-    <h2>Расходҳо</h2>
-    <input type="number" id="amountInput" placeholder="Суммаи хароҷот..." />
-    <button class="add-btn" onclick="addExpense()">+ Илова кардан</button>
-    <div class="list" id="expenses"></div>
-    <div id="itog">Итог: 0 сомонӣ</div>
-  </section>
+    <div class="history" id="history"></div>
+    <div class="total" id="total"></div>
+  </div>
 
-  <section id="nalichi">
-    <h2>Нақдӣ</h2>
-    <input type="number" id="nalichiInput" placeholder="Суммаи нақдӣ..." />
-    <button class="add-btn" onclick="addNalichi()">+ Илова кардан</button>
-    <div class="list" id="nalichiList"></div>
-    <div id="nalichiItog">Баланс: 0 сомонӣ</div>
-    <button class="download-btn" onclick="downloadReport()">Скачать Молияи Шахсӣ.txt</button>
-  </section>
+  <div class="section">
+    <h2>🧮 Калькулятор</h2>
+    <input type="number" id="calc1" placeholder="Адад 1" />
+    <input type="number" id="calc2" placeholder="Адад 2" />
+    <select id="operation">
+      <option value="+">+</option>
+      <option value="-">−</option>
+      <option value="*">×</option>
+      <option value="/">÷</option>
+    </select>
+    <button class="btn-calc" onclick="calculate()">Ҳисоб кардан</button>
+    <div id="calcResult" style="margin-top:10px; font-size:18px;"></div>
+  </div>
 
-  <section id="diagram">
-    <h2>Диограммаҳо</h2>
-    <div class="chart-container">
-      <h3>Диограммаи Расход</h3>
-      <canvas id="expenseChart"></canvas>
-    </div>
-    <div class="chart-container">
-      <h3>Диограммаи Нақдӣ</h3>
-      <canvas id="cashChart"></canvas>
-    </div>
-  </section>
+  <script>
+    let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
 
-  <section id="calculator">
-    <h2>Калкулятор</h2>
-    <input type="number" id="calc1" placeholder="Рақами 1" />
-    <input type="number" id="calc2" placeholder="Рақами 2" />
-    <div class="calc-btns" style="display:flex; flex-wrap: wrap; justify-content: space-around;">
-      <button onclick="calculate('+')">+</button>
-      <button onclick="calculate('-')">−</button>
-      <button onclick="calculate('*')">×</button>
-      <button onclick="calculate('/')">÷</button>
-    </div>
-    <div id="calcResult" style="text-align: center; font-size: 24px; color: #ffeb3b;">Натиҷа: </div>
-  </section>
-</main>
+    function render() {
+      const history = document.getElementById("history");
+      const total = document.getElementById("total");
+      history.innerHTML = "";
+      let balance = 0;
 
-<footer>
-  <p>&copy; 2025 Молияи Шахсӣ.tj | Ҳамаи ҳуқуқҳо ҳифз шудаанд.</p>
-</footer>
+      transactions.forEach((t, index) => {
+        const color = t.type === "income" ? "green" : "red";
+        balance += t.type === "income" ? t.amount : -t.amount;
+        history.innerHTML += `<div style="color:${color}">${index+1}. ${t.description} - ${t.amount} сом (${t.type === 'income' ? 'даромад' : 'хароҷот'})</div>`;
+      });
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-let expenses = [], nalichi = [];
-const expensesDiv = document.getElementById('expenses');
-const amountInput = document.getElementById('amountInput');
-const itogDiv = document.getElementById('itog');
-const nalichiDiv = document.getElementById('nalichiList');
-const nalichiInput = document.getElementById('nalichiInput');
-const nalichiItog = document.getElementById('nalichiItog');
-let expenseChart, cashChart;
+      total.textContent = "Баланс: " + balance + " сом";
+    }
 
-const EXPENSES_KEY = 'moliyasi_expenses';
-const NALICHI_KEY = 'moliyasi_nalichi';
+    function addTransaction() {
+      const description = document.getElementById("description").value;
+      const amount = parseFloat(document.getElementById("amount").value);
+      const type = document.getElementById("type").value;
 
-function formatDate() {
-  const now = new Date();
-  return `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth()+1).padStart(2, '0')}.${now.getFullYear()}`;
-}
+      if (!description || isNaN(amount)) {
+        alert("Лутфан маълумотро пур кунед!");
+        return;
+      }
 
-function saveData() {
-  localStorage.setItem(EXPENSES_KEY, JSON.stringify(expenses));
-  localStorage.setItem(NALICHI_KEY, JSON.stringify(nalichi));
-}
-function loadData() {
-  expenses = JSON.parse(localStorage.getItem(EXPENSES_KEY) || '[]');
-  nalichi = JSON.parse(localStorage.getItem(NALICHI_KEY) || '[]');
-}
-function addExpense() {
-  const amount = parseFloat(amountInput.value);
-  if (!amount || amount <= 0) return alert("Суммаи дуруст ворид кунед.");
-  expenses.push({ amount, date: formatDate() });
-  updateExpenses(); updateExpenseChart(); saveData(); amountInput.value = '';
-}
-function updateExpenses() {
-  expensesDiv.innerHTML = ''; let total = 0;
-  expenses.forEach((item, i) => {
-    total += item.amount;
-    const div = document.createElement('div');
-    div.className = 'item';
-    div.textContent = `${i + 1}) ${item.amount}с ${item.date}`;
-    expensesDiv.appendChild(div);
-  });
-  itogDiv.textContent = `Итог: ${total} сомонӣ`;
-}
-function addNalichi() {
-  const amount = parseFloat(nalichiInput.value);
-  if (!amount || amount <= 0) return alert("Маблағи дуруст ворид кунед.");
-  nalichi.push({ amount, date: formatDate() });
-  updateNalichi(); updateCashChart(); saveData(); nalichiInput.value = '';
-}
-function updateNalichi() {
-  nalichiDiv.innerHTML = ''; let total = 0;
-  nalichi.forEach((item, i) => {
-    total += item.amount;
-    const div = document.createElement('div');
-    div.className = 'item';
-    div.textContent = `${i + 1}) ${item.amount}с ${item.date}`;
-    nalichiDiv.appendChild(div);
-  });
-  nalichiItog.textContent = `Баланс: ${total} сомонӣ`;
-}
-function updateExpenseChart() {
-  const total = expenses.reduce((sum, x) => sum + x.amount, 0);
-  const data = { labels: ['Расход'], datasets: [{ data: [total], backgroundColor: ['#E91E63'] }] };
-  if (expenseChart) { expenseChart.data = data; expenseChart.update(); }
-  else expenseChart = new Chart(document.getElementById('expenseChart'), { type: 'doughnut', data });
-}
-function updateCashChart() {
-  const total = nalichi.reduce((sum, x) => sum + x.amount, 0);
-  const data = { labels: ['Нақдӣ'], datasets: [{ data: [total], backgroundColor: ['#4CAF50'] }] };
-  if (cashChart) { cashChart.data = data; cashChart.update(); }
-  else cashChart = new Chart(document.getElementById('cashChart'), { type: 'doughnut', data });
-}
-function downloadReport() {
-  let txt = 'Молияи Шахсӣ\n\nРасходҳо:\n';
-  expenses.forEach((x,i)=>txt+=`${i+1}) ${x.amount}с ${x.date}\n`);
-  txt += `Итог расходов: ${expenses.reduce((s,x)=>s+x.amount,0)} сомонӣ\n\nНақдӣ:\n`;
-  nalichi.forEach((x,i)=>txt+=`${i+1}) ${x.amount}с ${x.date}\n`);
-  txt += `Баланс: ${nalichi.reduce((s,x)=>s+x.amount,0)} сомонӣ\n`;
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([txt], { type: 'text/plain' }));
-  a.download = 'Молияи Шахсӣ.txt'; a.click(); URL.revokeObjectURL(a.href);
-}
-function showSection(e, id) {
-  e.preventDefault();
-  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
-  e.currentTarget.classList.add('active');
-  document.querySelectorAll('main section').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-function calculate(op) {
-  const a = parseFloat(document.getElementById('calc1').value);
-  const b = parseFloat(document.getElementById('calc2').value);
-  if (isNaN(a) || isNaN(b)) return alert('Лутфан ду рақам ворид кунед.');
-  let result;
-  switch (op) {
-    case '+': result = a + b; break;
-    case '-': result = a - b; break;
-    case '*': result = a * b; break;
-    case '/': if (b === 0) return alert('Ба сифр тақсим карда намешавад.'); result = a / b; break;
-  }
-  document.getElementById('calcResult').textContent = `Натиҷа: ${result}`;
-}
-window.onload = () => {
-  loadData(); updateExpenses(); updateNalichi(); updateExpenseChart(); updateCashChart();
-};
-</script>
+      transactions.push({ description, amount, type });
+      localStorage.setItem("transactions", JSON.stringify(transactions));
+      document.getElementById("description").value = "";
+      document.getElementById("amount").value = "";
+      render();
+    }
 
+    function clearData() {
+      if (confirm("Шумо мутмаин ҳастед, ки мехоҳед ҳама маълумотро нест кунед?")) {
+        localStorage.removeItem("transactions");
+        transactions = [];
+        render();
+      }
+    }
+
+    function calculate() {
+      const a = parseFloat(document.getElementById("calc1").value);
+      const b = parseFloat(document.getElementById("calc2").value);
+      const op = document.getElementById("operation").value;
+
+      if (isNaN(a) || isNaN(b)) {
+        alert("Ададҳоро ворид кунед!");
+        return;
+      }
+
+      let result;
+      if (op === "+") result = a + b;
+      else if (op === "-") result = a - b;
+      else if (op === "*") result = a * b;
+      else if (op === "/") result = b !== 0 ? (a / b) : "Қисм ба сифр нест!";
+      else result = "Амали номаълум";
+
+      document.getElementById("calcResult").textContent = "Натиҷа: " + result;
+    }
+
+    render();
+  </script>
 </body>
 </html>
